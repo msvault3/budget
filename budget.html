@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Budget — Max</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0d0d0d;color:#d0d0d0;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.6;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+h2{font-size:18px;font-weight:600;color:#f0f0f0;margin-bottom:4px;}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px;min-height:100vh;}
+.card{background:#141414;border:1px solid #242424;padding:20px;margin-bottom:18px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#484848;padding:8px 14px;text-align:left;border-bottom:1px solid #222;}
+th.r{text-align:right;}
+td{padding:11px 14px;border-bottom:1px solid #1c1c1c;color:#c0c0c0;vertical-align:middle;}
+td.r{text-align:right;font-family:'IBM Plex Mono',monospace;}
+td.m{font-family:'IBM Plex Mono',monospace;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#191919;}
+tfoot td{border-top:1px solid #2a2a2a!important;border-bottom:none;background:#191919;font-weight:600;}
+input,select,textarea{background:#1a1a1a;border:1px solid #2e2e2e;color:#e0e0e0;padding:8px 10px;font-size:14px;font-family:'IBM Plex Sans',sans-serif;outline:none;width:100%;transition:border-color 0.15s;}
+input:focus,select:focus,textarea:focus{border-color:#3b82f6;}
+input[type=number]{font-family:'IBM Plex Mono',monospace;text-align:right;}
+input[type=number]::-webkit-inner-spin-button{opacity:0.3;}
+select option{background:#1a1a1a;}
+.fl{font-size:12px;color:#555;margin-bottom:5px;display:block;font-weight:500;}
+.fg{margin-bottom:14px;}
+.btn{padding:8px 18px;font-size:13px;font-weight:500;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;border:1px solid transparent;transition:all 0.12s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{opacity:0.82;}
+.btn:active{transform:scale(0.98);}
+.bp{background:#2563eb;color:#fff;border-color:#2563eb;}
+.bg{background:transparent;color:#888;border-color:#2e2e2e;}
+.bg:hover{border-color:#555;color:#ccc;opacity:1;}
+.bd{background:#450a0a;color:#fca5a5;border-color:#7f1d1d;}
+.bsm{padding:4px 10px;font-size:12px;}
+.bxs{padding:2px 8px;font-size:11px;}
+.tag{display:inline-block;padding:2px 8px;font-size:11px;font-family:'IBM Plex Mono',monospace;}
+.tg{background:#052e16;color:#4ade80;border:1px solid #14532d;}
+.tr_{background:#450a0a;color:#f87171;border:1px solid #7f1d1d;}
+.ty{background:#451a03;color:#fbbf24;border:1px solid #78350f;}
+.tb{background:#0c1a35;color:#60a5fa;border:1px solid #1e3a5f;}
+.tp{background:#1e1b4b;color:#a5b4fc;border:1px solid #312e81;}
+.tab-bar{display:flex;border-bottom:1px solid #222;margin-bottom:28px;overflow-x:auto;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.ti{padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;color:#484848;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.12s;user-select:none;white-space:nowrap;}
+.ti:hover{color:#999;}
+.ti.on{color:#e8e8e8;border-bottom-color:#3b82f6;}
+.sl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#444;margin-bottom:10px;margin-top:24px;}
+.sl.first{margin-top:0;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:#111;}
+::-webkit-scrollbar-thumb{background:#2a2a2a;}
+.empty{color:#444;font-size:13px;text-align:center;padding:40px;}
+.sync-bar{position:fixed;bottom:18px;right:24px;background:#141414;border:1px solid #2a2a2a;padding:8px 16px;font-size:12px;color:#666;display:flex;align-items:center;gap:8px;z-index:100;transition:opacity 0.4s;}
+.dot{width:7px;height:7px;border-radius:50%;}
+.progress-track{height:5px;background:#222;width:100%;overflow:hidden;}
+.progress-fill{height:100%;transition:width 0.5s;}
+canvas{max-width:100%;}
+.note{font-size:12px;color:#555;margin-top:3px;}
+.warn-box{background:#1a0e00;border:1px solid #78350f;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#fbbf24;}
+.info-box{background:#0c1a35;border:1px solid #1e3a5f;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#93c5fd;}
+.setup-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;max-width:520px;margin:0 auto;}
+code{font-family:'IBM Plex Mono',monospace;background:#1a1a1a;padding:2px 6px;font-size:12px;color:#a5b4fc;border:1px solid #2e2e2e;}
+pre{background:#111;border:1px solid #222;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#a5b4fc;overflow-x:auto;line-height:1.7;margin:12px 0;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+// ─── CONFIG ── replace these after Supabase setup ───────────────────────────
+const SUPABASE_URL  = 'https://isbbtvthdmytyzfiqymw.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_RO2t8NTl8ytX5SBPQ2fW-g_XhSKZKZz';
+const ROW_ID        = 'max_budget';   // unique key for your data row
+// ────────────────────────────────────────────────────────────────────────────
+
+const sbClient = (SUPABASE_URL !== 'YOUR_SUPABASE_URL')
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+  : null;
+
+// ─── STATIC DATA ─────────────────────────────────────────────────────────────
+
+const FIXED=[
+  {id:'rent',   label:'Rent (your share)',   amount:464, note:'Frontier total $2,329.99/mo'},
+  {id:'elec',   label:'Electric (share)',    amount:24,  note:'Evergy avg $130/mo total'},
+  {id:'gasu',   label:'Gas utility (share)', amount:20,  note:'Avg $197/mo -- spiked $490 in Feb'},
+  {id:'water',  label:'Water (share)',       amount:18,  note:'City of Manhattan avg $86/mo total'},
+  {id:'trash',  label:'Trash pickup',        amount:29,  note:'Howies $87/quarter -- amortized'},
+  {id:'cc',     label:'Discover payment',    amount:100, note:'~$28 interest / ~$72 principal at 26.49% APR'},
+  {id:'bankfee',label:'Bank fee',            amount:6,   note:'ID theft monitoring'},
+];
+const FIXED_TOTAL = FIXED.reduce((s,e)=>s+e.amount,0);
+
+const SUB_DEF=[
+  {id:'s1', label:'Amazon Prime',    amount:14.99,keep:true, note:''},
+  {id:'s2', label:'Apple services',  amount:22.90,keep:true, note:'Apple.com/bill recurring'},
+  {id:'s3', label:'iCloud+',         amount:3.00, keep:true, note:''},
+  {id:'s4', label:'Claude Pro',      amount:20.00,keep:true, note:''},
+  {id:'s5', label:'Anthropic API',   amount:10.00,keep:true, note:'Variable -- estimate'},
+  {id:'s6', label:'Google One',      amount:1.99, keep:true, note:''},
+  {id:'s7', label:'ONX Hunt',        amount:4.17, keep:true, note:'$50/yr -- next charge May 2027'},
+  {id:'s8', label:'Snapchat+',       amount:2.00, keep:true, note:''},
+  {id:'s9', label:'X Premium',       amount:4.00, keep:true, note:''},
+  {id:'s10',label:'YouTube Premium', amount:19.00,keep:true, note:''},
+  {id:'s11',label:'ChatGPT',         amount:20.00,keep:false,note:'Cancelled'},
+  {id:'s12',label:'Tucker Carlson',  amount:9.00, keep:false,note:'Cancelled'},
+  {id:'s13',label:'ESPN+',           amount:14.21,keep:false,note:'Cancelled'},
+  {id:'s14',label:'The Daily Wire',  amount:16.35,keep:false,note:'Cancelled'},
+  {id:'s15',label:'AutoPilot',       amount:74.98,keep:false,note:'Cancelled -- verify charge stopped'},
+];
+
+const VAR_DEF=[
+  {id:'groceries',label:'Groceries',         budget:150, hist:191,note:'Cook consistently; reduce impulse buys'},
+  {id:'dining',   label:'Dining out',        budget:100, hist:190,note:'Local baseline ~$100; travel inflated avg'},
+  {id:'gas',      label:'Gas / fuel',        budget:75,  hist:145,note:'Local use ~$75; trips inflated avg'},
+  {id:'conv',     label:'Convenience stores',budget:20,  hist:68, note:'Already dropped to $17 in Feb naturally'},
+  {id:'amazon',   label:'Amazon',            budget:30,  hist:217,note:'One-time purchase era is over'},
+  {id:'alctob',   label:'Alcohol / tobacco', budget:25,  hist:42, note:'Reduction, not elimination'},
+  {id:'pets',     label:'Pets',              budget:26,  hist:26, note:'PetSmart'},
+  {id:'haircuts', label:'Haircuts',          budget:30,  hist:23, note:''},
+  {id:'vending',  label:'Vending / soda',   budget:0,   hist:9,  note:'Cut entirely'},
+  {id:'misc',     label:'Misc',             budget:60,  hist:211,note:'Buffer for genuine unexpected needs'},
+];
+
+const EXP_CATS=['Groceries','Dining out','Gas / fuel','Utilities','Subscriptions','Amazon',
+  'Clothing','Alcohol / tobacco','Pets','Haircut','Medical','Vehicle / auto','Travel','Entertainment','Misc'];
+const INC_CATS=['PhD stipend','Job / salary','Freelance','Parental support','Investment sale','Reimbursement','Other'];
+
+const CHART_COLORS=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
+
+const DEFAULT_STATE={
+  balances:{checking:2965.11,cc:1255.88,investments:1219.80},
+  balanceDate: new Date().toISOString().slice(0,10),
+  subs: SUB_DEF,
+  varBudgets: Object.fromEntries(VAR_DEF.map(v=>[v.id,v.budget])),
+  transactions:[],
+  investments:[],
+  goals:[],
+  netWorthHistory:[{date:new Date().toISOString().slice(0,10),value:2965.11-1255.88+1219.80}],
+  phdStipend:1667,
+};
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+const fmt=n=>(n<0?'-$':'$')+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate=s=>{const d=new Date(s+'T12:00:00');return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});};
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const monthKey=s=>s.slice(0,7);
+const monthLabel=s=>{const[y,m]=s.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+y;};
+
+function useChart(ref,cfg){
+  const inst=useRef(null);
+  useEffect(()=>{
+    if(!ref.current)return;
+    if(inst.current)inst.current.destroy();
+    inst.current=new Chart(ref.current,cfg);
+    return()=>{if(inst.current){inst.current.destroy();inst.current=null;}};
+  },[JSON.stringify(cfg)]);
+}
+
+// ─── SUPABASE SYNC ────────────────────────────────────────────────────────────
+
+async function loadFromDB(){
+  if(!sbClient)return null;
+  const {data,error}=await sbClient.from('budget_data').select('data').eq('id',ROW_ID).single();
+  if(error||!data)return null;
+  return data.data;
+}
+
+async function saveToDB(state){
+  if(!sbClient)return false;
+  const {error}=await sbClient.from('budget_data').upsert({id:ROW_ID,data:state,updated_at:new Date().toISOString()});
+  return !error;
+}
+
+// ─── METRIC CARD ──────────────────────────────────────────────────────────────
+
+function Metric({label,value,sub,color,subColor}){
+  return(
+    <div className="card" style={{marginBottom:0}}>
+      <div style={{fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'2px',color:'#484848',marginBottom:10}}>{label}</div>
+      <div className="mono" style={{fontSize:22,fontWeight:600,color:color||'#e0e0e0',lineHeight:1}}>{value}</div>
+      {sub&&<div style={{fontSize:12,color:subColor||'#555',marginTop:8,lineHeight:1.5}}>{sub}</div>}
+    </div>
+  );
+}
+
+function SL({children,first}){return<div className={`sl${first?' first':''}`}>{children}</div>;}
+
+// ─── OVERVIEW TAB ─────────────────────────────────────────────────────────────
+
+function Overview({s,burn,liquid,subTotal,varTotal}){
+  const netWorth=liquid-s.balances.cc+s.balances.investments;
+  const CC_APR=0.2649, CC_BAL=s.balances.cc, CC_PMT=100;
+  const monthlyInt=CC_BAL*(CC_APR/12);
+  const phdDate=new Date(2026,7,1);
+  const monthsToPhd=Math.max(0.01,(phdDate-new Date())/(1000*60*60*24*30.44));
+  const monthsLeft=liquid/Math.max(1,burn);
+  const shortfall=burn*monthsToPhd-liquid;
+  const makeIt=shortfall<=0;
+  const urgC=monthsLeft<2?'#f87171':monthsLeft<monthsToPhd?'#fbbf24':'#4ade80';
+  const pct=Math.min(100,(monthsLeft/Math.max(0.01,monthsToPhd))*100);
+
+  // Recent transactions
+  const recent=[...s.transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+
+  return(
+    <div>
+      <div className="g4" style={{marginBottom:18}}>
+        <Metric label="Liquid Cash" value={fmt(liquid)} sub={`Balance as of ${fmtDate(s.balanceDate)}`} color="#4ade80"/>
+        <Metric label="CC Balance" value={fmt(s.balances.cc)} sub={`26.49% APR -- ${fmt(monthlyInt)}/mo interest`} color="#f87171"/>
+        <Metric label="Net Worth" value={fmt(netWorth)} sub="Cash + investments − CC" color={netWorth>=0?'#60a5fa':'#f87171'}/>
+        <Metric label="Investments" value={fmt(s.balances.investments)} sub="Not counted in runway" color="#fbbf24"/>
+      </div>
+
+      <div className="card" style={{borderLeft:`3px solid ${urgC}`,marginBottom:18}}>
+        <div style={{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:24,marginBottom:18}}>
+          <div>
+            <div style={{fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'2px',color:'#484848',marginBottom:10}}>Runway at current budget</div>
+            <div style={{display:'flex',alignItems:'baseline',gap:10}}>
+              <span className="mono" style={{fontSize:48,fontWeight:600,color:urgC,lineHeight:1}}>{monthsLeft.toFixed(1)}</span>
+              <span style={{fontSize:16,color:'#555'}}>months</span>
+            </div>
+            <div style={{fontSize:13,color:'#666',marginTop:8}}>Monthly burn: <span className="mono" style={{color:'#ccc'}}>{fmt(burn)}</span></div>
+          </div>
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'2px',color:'#484848',marginBottom:10}}>PhD Start — Aug 2026</div>
+            <div className="mono" style={{fontSize:30,fontWeight:600,lineHeight:1,color:makeIt?'#4ade80':'#f87171'}}>
+              {makeIt?fmt(Math.abs(shortfall))+' buffer':fmt(Math.abs(shortfall))+' short'}
+            </div>
+            <div style={{fontSize:13,color:'#555',marginTop:8}}>{monthsToPhd.toFixed(1)} months away — stipend ~{fmt(s.phdStipend)}/mo + tuition waiver</div>
+          </div>
+        </div>
+        <div style={{fontSize:11,color:'#484848',marginBottom:6,display:'flex',justifyContent:'space-between'}}>
+          <span>Today</span><span>{pct.toFixed(0)}% of runway to PhD</span><span>PhD Start</span>
+        </div>
+        <div className="progress-track">
+          <div className="progress-fill" style={{width:`${pct}%`,background:urgC}}/>
+        </div>
+      </div>
+
+      <div className="g2" style={{marginBottom:18}}>
+        <div className="card" style={{marginBottom:0}}>
+          <div style={{fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'2px',color:'#484848',marginBottom:14}}>Monthly Budget Summary</div>
+          <table>
+            <tbody>
+              {[['Fixed expenses',FIXED_TOTAL],['Active subscriptions',subTotal],['Variable (budgeted)',varTotal]].map(([l,a])=>(
+                <tr key={l}><td style={{color:'#aaa'}}>{l}</td><td className="r">{fmt(a)}</td><td className="r" style={{color:'#555',fontSize:12}}>{((a/burn)*100).toFixed(0)}%</td></tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr><td style={{color:'#e0e0e0',fontSize:15}}>Total burn</td><td className="r" style={{color:'#e0e0e0',fontSize:17}}>{fmt(burn)}</td><td></td></tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div className="card" style={{marginBottom:0}}>
+          <div style={{fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'2px',color:'#484848',marginBottom:14}}>Recent Transactions</div>
+          {recent.length===0
+            ?<div className="empty" style={{padding:'20px 0'}}>No transactions yet — log them in the Transactions tab</div>
+            :<table>
+              <tbody>
+                {recent.map(t=>(
+                  <tr key={t.id}>
+                    <td style={{color:'#666',fontSize:12,paddingLeft:0}}>{fmtDate(t.date)}</td>
+                    <td style={{color:'#c0c0c0'}}>{t.desc}</td>
+                    <td className="r" style={{color:t.type==='income'?'#4ade80':'#f87171',paddingRight:0}}>
+                      {t.type==='income'?'+':'-'}{fmt(t.amount)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── BUDGET TAB ───────────────────────────────────────────────────────────────
+
+function BudgetTab({s,setState,burn,subTotal}){
+  const varTotal=VAR_DEF.reduce((sum,v)=>sum+(s.varBudgets[v.id]??v.budget),0);
+  const setVar=(id,val)=>setState(p=>({...p,varBudgets:{...p.varBudgets,[id]:parseFloat(val)||0}}));
+
+  // Smart recommendations -- only if 2+ months of logged data
+  const txByMonth=useMemo(()=>{
+    const map={};
+    s.transactions.filter(t=>t.type==='expense').forEach(t=>{
+      const mk=monthKey(t.date);
+      if(!map[mk])map[mk]={};
+      const cat=t.category||'Misc';
+      map[mk][cat]=(map[mk][cat]||0)+t.amount;
+    });
+    return map;
+  },[s.transactions]);
+
+  const months=Object.keys(txByMonth).sort();
+  const hasRecommendations=months.length>=2;
+
+  const recommendations=useMemo(()=>{
+    if(!hasRecommendations)return[];
+    const catTotals={};
+    months.forEach(m=>{
+      Object.entries(txByMonth[m]).forEach(([cat,amt])=>{
+        if(!catTotals[cat])catTotals[cat]=[];
+        catTotals[cat].push(amt);
+      });
+    });
+    return Object.entries(catTotals).map(([cat,amts])=>{
+      const avg=amts.reduce((s,a)=>s+a,0)/months.length;
+      const suggested=Math.round(avg*0.85/5)*5;
+      const varMatch=VAR_DEF.find(v=>v.label.toLowerCase()===cat.toLowerCase());
+      return {cat,avg,suggested,current:varMatch?s.varBudgets[varMatch.id]:null,varId:varMatch?.id};
+    }).filter(r=>r.varId&&r.suggested<r.avg);
+  },[txByMonth,months,s.varBudgets,hasRecommendations]);
+
+  return(
+    <div>
+      <SL first>Fixed Expenses</SL>
+      <div className="card">
+        <table>
+          <thead><tr><th>Item</th><th>Note</th><th className="r">Monthly</th></tr></thead>
+          <tbody>
+            {FIXED.map(e=>(
+              <tr key={e.id}>
+                <td style={{color:'#d0d0d0'}}>{e.label}</td>
+                <td><div className="note">{e.note}</div></td>
+                <td className="r">{fmt(e.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot><tr><td colSpan={2} style={{color:'#999'}}>Fixed Subtotal</td><td className="r" style={{fontSize:16}}>{fmt(FIXED_TOTAL)}</td></tr></tfoot>
+        </table>
+      </div>
+
+      {hasRecommendations&&recommendations.length>0&&(
+        <>
+          <SL>Recommendations from your spending</SL>
+          <div className="info-box" style={{marginBottom:10}}>
+            Based on {months.length} months of logged transactions. These are suggestions — apply what makes sense.
+          </div>
+          <div className="card">
+            <table>
+              <thead><tr><th>Category</th><th className="r">Your avg/mo</th><th className="r">Current target</th><th className="r">Suggested target</th><th></th></tr></thead>
+              <tbody>
+                {recommendations.map(r=>(
+                  <tr key={r.cat}>
+                    <td style={{color:'#d0d0d0'}}>{r.cat}</td>
+                    <td className="r" style={{color:'#f87171'}}>{fmt(r.avg)}</td>
+                    <td className="r">{r.current!==null?fmt(r.current):'—'}</td>
+                    <td className="r" style={{color:'#4ade80'}}>{fmt(r.suggested)}</td>
+                    <td style={{textAlign:'right'}}><button className="btn bg bsm" onClick={()=>r.varId&&setVar(r.varId,r.suggested)}>Apply</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {!hasRecommendations&&(
+        <div className="info-box" style={{marginTop:14}}>
+          Budget recommendations will appear once you have 2+ months of logged transactions. Keep logging.
+        </div>
+      )}
+
+      <SL>Variable Budget Targets</SL>
+      <div style={{fontSize:13,color:'#666',marginBottom:12}}>
+        Edit the target column. Runway on the Overview tab updates automatically.
+      </div>
+      <div className="card">
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Baseline note</th><th className="r">Historical avg</th><th className="r" style={{width:130}}>Budget target</th><th className="r">Saving vs hist</th></tr>
+          </thead>
+          <tbody>
+            {VAR_DEF.map(v=>{
+              const bud=s.varBudgets[v.id]??v.budget;
+              const diff=v.hist-bud;
+              return(
+                <tr key={v.id}>
+                  <td style={{color:'#d0d0d0'}}>{v.label}</td>
+                  <td><div className="note">{v.note}</div></td>
+                  <td className="r" style={{color:'#666'}}>{fmt(v.hist)}</td>
+                  <td className="r" style={{paddingRight:14}}>
+                    <input type="number" value={bud} onChange={e=>setVar(v.id,e.target.value)} style={{width:100}}/>
+                  </td>
+                  <td className="r" style={{color:diff>0?'#4ade80':diff<0?'#f87171':'#666',fontWeight:500}}>
+                    {diff>=0?'+':''}{fmt(diff)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td style={{color:'#999'}}>Variable Subtotal</td>
+              <td></td>
+              <td className="r" style={{color:'#666'}}>{fmt(VAR_DEF.reduce((s,v)=>s+v.hist,0))}</td>
+              <td className="r" style={{fontSize:16,paddingRight:14}}>{fmt(varTotal)}</td>
+              <td className="r" style={{color:'#4ade80',fontWeight:600}}>{fmt(VAR_DEF.reduce((s,v)=>s+v.hist,0)-varTotal)}/mo saved</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ─── SUBSCRIPTIONS TAB ────────────────────────────────────────────────────────
+
+function SubsTab({s,setState}){
+  const [adding,setAdding]=useState(false);
+  const [form,setForm]=useState({label:'',amount:'',note:''});
+  const toggle=id=>setState(p=>({...p,subs:p.subs.map(x=>x.id===id?{...x,keep:!x.keep}:x)}));
+  const remove=id=>setState(p=>({...p,subs:p.subs.filter(x=>x.id!==id)}));
+  const add=()=>{
+    const amt=parseFloat(form.amount);
+    if(!form.label.trim()||!amt)return;
+    setState(p=>({...p,subs:[...p.subs,{id:uid(),label:form.label.trim(),amount:amt,keep:true,note:form.note}]}));
+    setForm({label:'',amount:'',note:''});setAdding(false);
+  };
+  const active=s.subs.filter(x=>x.keep);
+  const cancelled=s.subs.filter(x=>!x.keep);
+  const activeTotal=active.reduce((sum,x)=>sum+x.amount,0);
+  const cancelledTotal=cancelled.reduce((sum,x)=>sum+x.amount,0);
+
+  return(
+    <div>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+        <SL first style={{marginBottom:0}}>Active Subscriptions</SL>
+        <button className="btn bp bsm" onClick={()=>setAdding(!adding)}>+ Add Subscription</button>
+      </div>
+
+      {adding&&(
+        <div className="card" style={{marginBottom:14}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 120px 1fr auto',gap:10,alignItems:'end'}}>
+            <div><label className="fl">Service name</label><input type="text" placeholder="Netflix, Gym, etc." value={form.label} onChange={e=>setForm(f=>({...f,label:e.target.value}))}/></div>
+            <div><label className="fl">$/month</label><input type="number" placeholder="0.00" value={form.amount} onChange={e=>setForm(f=>({...f,amount:e.target.value}))}/></div>
+            <div><label className="fl">Note (optional)</label><input type="text" placeholder="e.g. annual, shared" value={form.note} onChange={e=>setForm(f=>({...f,note:e.target.value}))}/></div>
+            <div style={{display:'flex',gap:8,paddingBottom:0}}>
+              <button className="btn bp" onClick={add}>Add</button>
+              <button className="btn bg" onClick={()=>setAdding(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="card">
+        <table>
+          <thead><tr><th>Service</th><th>Note</th><th className="r">Monthly</th><th className="r">Actions</th></tr></thead>
+          <tbody>
+            {active.map(x=>(
+              <tr key={x.id}>
+                <td style={{color:'#d0d0d0'}}>{x.label}</td>
+                <td><div className="note">{x.note}</div></td>
+                <td className="r">{fmt(x.amount)}</td>
+                <td className="r" style={{whiteSpace:'nowrap'}}>
+                  <button className="btn bg bxs" style={{marginRight:6}} onClick={()=>toggle(x.id)}>Cancel</button>
+                  <button className="btn bd bxs" onClick={()=>remove(x.id)}>Remove</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot><tr><td colSpan={2} style={{color:'#999'}}>Active Total</td><td className="r" style={{fontSize:16,color:'#e0e0e0'}}>{fmt(activeTotal)}</td><td></td></tr></tfoot>
+        </table>
+      </div>
+
+      {cancelled.length>0&&(
+        <>
+          <SL>Cancelled</SL>
+          <div className="card" style={{marginBottom:0}}>
+            <table>
+              <thead><tr><th>Service</th><th>Note</th><th className="r">Was</th><th className="r">Actions</th></tr></thead>
+              <tbody>
+                {cancelled.map(x=>(
+                  <tr key={x.id} style={{opacity:0.4}}>
+                    <td>{x.label}</td>
+                    <td><div className="note">{x.note}</div></td>
+                    <td className="r">{fmt(x.amount)}</td>
+                    <td className="r" style={{whiteSpace:'nowrap',opacity:1}}>
+                      <button className="btn bg bxs" style={{marginRight:6}} onClick={()=>toggle(x.id)}>Restore</button>
+                      <button className="btn bd bxs" onClick={()=>remove(x.id)}>Remove</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot><tr><td colSpan={2} style={{color:'#4ade80',fontSize:12}}>Saved by cancelling</td><td className="r" style={{color:'#4ade80',fontSize:16}}>{fmt(cancelledTotal)}/mo</td><td></td></tr></tfoot>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── TRANSACTIONS TAB ─────────────────────────────────────────────────────────
+
+function TxTab({s,setState,liquid}){
+  const [form,setForm]=useState({date:todayStr(),type:'expense',category:EXP_CATS[0],desc:'',amount:''});
+  const [filter,setFilter]=useState('all');
+  const [catFilter,setCatFilter]=useState('all');
+  const setF=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  const addTx=()=>{
+    const amt=parseFloat(form.amount);
+    if(!amt||!form.desc.trim())return;
+    setState(p=>({...p,transactions:[{id:uid(),date:form.date,type:form.type,category:form.category,desc:form.desc.trim(),amount:amt},...p.transactions]}));
+    setF('desc','');setF('amount','');
+  };
+  const removeTx=id=>setState(p=>({...p,transactions:p.transactions.filter(t=>t.id!==id)}));
+
+  const allCats=[...new Set(s.transactions.map(t=>t.category))].sort();
+  const displayed=s.transactions
+    .filter(t=>filter==='all'||t.type===filter)
+    .filter(t=>catFilter==='all'||t.category===catFilter)
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const mInc=s.transactions.filter(t=>t.type==='income'&&t.date.startsWith(thisMonth)).reduce((s,t)=>s+t.amount,0);
+  const mExp=s.transactions.filter(t=>t.type==='expense'&&t.date.startsWith(thisMonth)).reduce((s,t)=>s+t.amount,0);
+  const totalInc=s.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const totalExp=s.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+
+  // Running balance map
+  const balMap=useMemo(()=>{
+    const sorted=[...s.transactions].sort((a,b)=>new Date(a.date)-new Date(b.date));
+    let bal=s.balances.checking;
+    const m={};
+    sorted.forEach(t=>{bal+=t.type==='income'?t.amount:-t.amount;m[t.id]=bal;});
+    return m;
+  },[s.transactions,s.balances.checking]);
+
+  return(
+    <div>
+      <div className="g4" style={{marginBottom:18}}>
+        <Metric label="Current Balance" value={fmt(liquid)} color="#4ade80" sub="Baseline + logged transactions"/>
+        <Metric label="This Month Income" value={fmt(mInc)} color="#4ade80" sub={`${new Date().toLocaleString('default',{month:'long'})}`}/>
+        <Metric label="This Month Expenses" value={fmt(mExp)} color="#f87171" sub={`${new Date().toLocaleString('default',{month:'long'})}`}/>
+        <Metric label="All-time Net" value={fmt(totalInc-totalExp)} color={totalInc-totalExp>=0?'#60a5fa':'#f87171'} sub="All income minus expenses logged"/>
+      </div>
+
+      <SL first>Log a Transaction</SL>
+      <div className="card">
+        <div style={{display:'grid',gridTemplateColumns:'130px 110px 185px 110px 1fr 90px',gap:10,alignItems:'end'}}>
+          <div><label className="fl">Date</label><input type="date" value={form.date} onChange={e=>setF('date',e.target.value)}/></div>
+          <div><label className="fl">Type</label>
+            <select value={form.type} onChange={e=>{setF('type',e.target.value);setF('category',e.target.value==='income'?INC_CATS[0]:EXP_CATS[0]);}}>
+              <option value="expense">Expense</option><option value="income">Income</option>
+            </select>
+          </div>
+          <div><label className="fl">Category</label>
+            <select value={form.category} onChange={e=>setF('category',e.target.value)}>
+              {(form.type==='income'?INC_CATS:EXP_CATS).map(c=><option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div><label className="fl">Amount ($)</label><input type="number" placeholder="0.00" value={form.amount} onChange={e=>setF('amount',e.target.value)}/></div>
+          <div><label className="fl">Description</label><input type="text" placeholder="What was it?" value={form.desc} onChange={e=>setF('desc',e.target.value)} onKeyDown={e=>e.key==='Enter'&&addTx()}/></div>
+          <div><label className="fl">&nbsp;</label><button className="btn bp" style={{width:'100%',justifyContent:'center'}} onClick={addTx}>Add</button></div>
+        </div>
+      </div>
+
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12,flexWrap:'wrap',gap:8}}>
+        <SL first style={{marginBottom:0}}>Transaction Log ({s.transactions.length})</SL>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+          {['all','income','expense'].map(f=>(
+            <button key={f} className="btn bg bsm"
+              style={{background:filter===f?'#0c1a35':'transparent',borderColor:filter===f?'#3b82f6':'#2e2e2e',color:filter===f?'#60a5fa':'#777'}}
+              onClick={()=>setFilter(f)}>{f.charAt(0).toUpperCase()+f.slice(1)}</button>
+          ))}
+          {allCats.length>0&&(
+            <select value={catFilter} onChange={e=>setCatFilter(e.target.value)} style={{width:'auto',padding:'4px 10px',fontSize:12}}>
+              <option value="all">All categories</option>
+              {allCats.map(c=><option key={c}>{c}</option>)}
+            </select>
+          )}
+        </div>
+      </div>
+
+      {displayed.length===0
+        ?<div className="card empty">No transactions yet. Add income or expenses above.</div>
+        :<div className="card" style={{padding:0}}>
+          <table>
+            <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th className="r">Amount</th><th className="r">Balance</th><th></th></tr></thead>
+            <tbody>
+              {displayed.map(t=>(
+                <tr key={t.id}>
+                  <td className="m" style={{color:'#666',fontSize:12,whiteSpace:'nowrap'}}>{fmtDate(t.date)}</td>
+                  <td><span className={`tag ${t.type==='income'?'tg':'tr_'}`}>{t.type}</span></td>
+                  <td style={{color:'#888',fontSize:13}}>{t.category}</td>
+                  <td style={{color:'#d0d0d0'}}>{t.desc}</td>
+                  <td className="r" style={{color:t.type==='income'?'#4ade80':'#f87171',fontWeight:500}}>{t.type==='income'?'+':'-'}{fmt(t.amount)}</td>
+                  <td className="r" style={{color:'#555',fontSize:12}}>{fmt(balMap[t.id]||0)}</td>
+                  <td style={{textAlign:'right',paddingRight:14}}><button className="btn bg bxs" style={{color:'#444'}} onClick={()=>removeTx(t.id)}>×</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  );
+}
+
+// ─── INVESTMENTS TAB ──────────────────────────────────────────────────────────
+
+function InvestmentsTab({s,setState}){
+  const [form,setForm]=useState({ticker:'',name:'',shares:'',avgCost:'',sector:INV_SECTORS[0]});
+  const setF=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  const addPos=()=>{
+    const shares=parseFloat(form.shares),avgCost=parseFloat(form.avgCost);
+    if(!form.ticker.trim()||!shares||!avgCost)return;
+    setState(p=>({...p,investments:[...p.investments,{id:uid(),ticker:form.ticker.toUpperCase().trim(),name:form.name.trim(),shares,avgCost,currentPrice:avgCost,sector:form.sector,lastUpdated:todayStr()}]}));
+    setForm({ticker:'',name:'',shares:'',avgCost:'',sector:INV_SECTORS[0]});
+  };
+  const removePos=id=>setState(p=>({...p,investments:p.investments.filter(x=>x.id!==id)}));
+  const updatePrice=(id,price)=>setState(p=>({...p,investments:p.investments.map(x=>x.id===id?{...x,currentPrice:parseFloat(price)||x.currentPrice,lastUpdated:todayStr()}:x)}));
+  const updateTotalBal=val=>setState(p=>({...p,balances:{...p.balances,investments:parseFloat(val)||0}}));
+
+  const totalCost=s.investments.reduce((sum,x)=>sum+x.shares*x.avgCost,0);
+  const totalValue=s.investments.reduce((sum,x)=>sum+x.shares*x.currentPrice,0);
+  const totalGain=totalValue-totalCost;
+
+  return(
+    <div>
+      <div className="g3" style={{marginBottom:18}}>
+        <Metric label="Portfolio Value" value={fmt(totalValue||s.balances.investments)} color="#fbbf24" sub="Based on current prices entered"/>
+        <Metric label="Total Gain / Loss" value={fmt(totalGain)} color={totalGain>=0?'#4ade80':'#f87171'} sub={totalCost>0?`${((totalGain/totalCost)*100).toFixed(1)}% return on cost`:''}/>
+        <Metric label="Webull Balance" value={fmt(s.balances.investments)} color="#60a5fa" sub="Manual balance — update in Settings"/>
+      </div>
+
+      <SL first>Add Position</SL>
+      <div className="card">
+        <div style={{display:'grid',gridTemplateColumns:'100px 1fr 100px 120px 160px auto',gap:10,alignItems:'end'}}>
+          <div><label className="fl">Ticker</label><input type="text" placeholder="AAPL" value={form.ticker} onChange={e=>setF('ticker',e.target.value)} style={{textTransform:'uppercase'}}/></div>
+          <div><label className="fl">Name (optional)</label><input type="text" placeholder="Apple Inc." value={form.name} onChange={e=>setF('name',e.target.value)}/></div>
+          <div><label className="fl">Shares</label><input type="number" placeholder="10" value={form.shares} onChange={e=>setF('shares',e.target.value)}/></div>
+          <div><label className="fl">Avg cost ($)</label><input type="number" placeholder="150.00" value={form.avgCost} onChange={e=>setF('avgCost',e.target.value)}/></div>
+          <div><label className="fl">Sector</label><select value={form.sector} onChange={e=>setF('sector',e.target.value)}>{INV_SECTORS.map(s=><option key={s}>{s}</option>)}</select></div>
+          <div><label className="fl">&nbsp;</label><button className="btn bp" onClick={addPos}>Add</button></div>
+        </div>
+      </div>
+
+      {s.investments.length===0
+        ?<div className="card empty">No positions added yet. Add your Webull holdings above.</div>
+        :<div className="card" style={{padding:0}}>
+          <table>
+            <thead><tr><th>Ticker</th><th>Name</th><th>Sector</th><th className="r">Shares</th><th className="r">Avg cost</th><th className="r">Current price</th><th className="r">Value</th><th className="r">Gain / Loss</th><th></th></tr></thead>
+            <tbody>
+              {s.investments.map(x=>{
+                const value=x.shares*x.currentPrice;
+                const cost=x.shares*x.avgCost;
+                const gain=value-cost;
+                const gainPct=((gain/cost)*100).toFixed(1);
+                return(
+                  <tr key={x.id}>
+                    <td className="m" style={{color:'#f0f0f0',fontWeight:600}}>{x.ticker}</td>
+                    <td style={{color:'#888',fontSize:13}}>{x.name||'—'}</td>
+                    <td><span className="tag tb" style={{fontSize:10}}>{x.sector}</span></td>
+                    <td className="r">{x.shares}</td>
+                    <td className="r" style={{color:'#666'}}>{fmt(x.avgCost)}</td>
+                    <td className="r" style={{paddingRight:14}}>
+                      <input type="number" value={x.currentPrice} onChange={e=>updatePrice(x.id,e.target.value)} style={{width:90,fontSize:13}}/>
+                    </td>
+                    <td className="r" style={{color:'#fbbf24'}}>{fmt(value)}</td>
+                    <td className="r" style={{color:gain>=0?'#4ade80':'#f87171'}}>
+                      {gain>=0?'+':''}{fmt(gain)}<br/>
+                      <span style={{fontSize:11,color:gain>=0?'#16a34a':'#dc2626'}}>{gainPct}%</span>
+                    </td>
+                    <td style={{textAlign:'right',paddingRight:14}}><button className="btn bd bxs" onClick={()=>removePos(x.id)}>×</button></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={6} style={{color:'#999'}}>Portfolio Total</td>
+                <td className="r" style={{color:'#fbbf24',fontSize:16}}>{fmt(totalValue)}</td>
+                <td className="r" style={{color:totalGain>=0?'#4ade80':'#f87171',fontSize:14}}>{totalGain>=0?'+':''}{fmt(totalGain)}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+
+      <div className="info-box" style={{marginTop:14}}>
+        Update current prices manually — open Webull, enter latest prices above. Update the Webull balance in Settings when you check your account.
+      </div>
+    </div>
+  );
+}
+
+// ─── ANALYTICS TAB ────────────────────────────────────────────────────────────
+
+function AnalyticsTab({s,burn}){
+  const c1=useRef(),c2=useRef(),c3=useRef(),c4=useRef();
+
+  const txByMonth=useMemo(()=>{
+    const map={};
+    s.transactions.forEach(t=>{
+      const mk=monthKey(t.date);
+      if(!map[mk])map[mk]={income:0,expense:0,byCategory:{}};
+      if(t.type==='income') map[mk].income+=t.amount;
+      else{
+        map[mk].expense+=t.amount;
+        map[mk].byCategory[t.category]=(map[mk].byCategory[t.category]||0)+t.amount;
+      }
+    });
+    return map;
+  },[s.transactions]);
+
+  const months=Object.keys(txByMonth).sort().slice(-6);
+  const hasData=months.length>0;
+
+  const allCats=[...new Set(s.transactions.filter(t=>t.type==='expense').map(t=>t.category))];
+
+  const chartBase={responsive:true,plugins:{legend:{labels:{color:'#888',font:{family:"'IBM Plex Sans',sans-serif",size:12}}},tooltip:{backgroundColor:'#1a1a1a',titleColor:'#e0e0e0',bodyColor:'#aaa',borderColor:'#333',borderWidth:1}},scales:{x:{ticks:{color:'#555',font:{size:11}},grid:{color:'#1e1e1e'}},y:{ticks:{color:'#555',font:{size:11},callback:v=>'$'+v.toLocaleString()},grid:{color:'#1e1e1e'}}}};
+
+  // Chart 1: Spending by category (stacked bar)
+  useChart(c1,{
+    type:'bar',
+    data:{
+      labels:months.map(monthLabel),
+      datasets:allCats.map((cat,i)=>({
+        label:cat,
+        data:months.map(m=>txByMonth[m]?.byCategory[cat]||0),
+        backgroundColor:CHART_COLORS[i%CHART_COLORS.length]+'cc',
+        borderColor:CHART_COLORS[i%CHART_COLORS.length],
+        borderWidth:1,
+      }))
+    },
+    options:{...chartBase,plugins:{...chartBase.plugins,title:{display:true,text:'Monthly Spending by Category',color:'#ccc',font:{size:14,weight:'600',family:"'IBM Plex Sans'"}}},scales:{...chartBase.scales,x:{...chartBase.scales.x,stacked:true},y:{...chartBase.scales.y,stacked:true}}}
+  });
+
+  // Chart 2: Income vs expenses
+  useChart(c2,{
+    type:'bar',
+    data:{
+      labels:months.map(monthLabel),
+      datasets:[
+        {label:'Income',data:months.map(m=>txByMonth[m]?.income||0),backgroundColor:'#16a34a99',borderColor:'#4ade80',borderWidth:1},
+        {label:'Expenses',data:months.map(m=>txByMonth[m]?.expense||0),backgroundColor:'#dc262699',borderColor:'#f87171',borderWidth:1},
+      ]
+    },
+    options:{...chartBase,plugins:{...chartBase.plugins,title:{display:true,text:'Income vs Expenses',color:'#ccc',font:{size:14,weight:'600',family:"'IBM Plex Sans'"}}}}
+  });
+
+  // Chart 3: Burn rate vs budget
+  useChart(c3,{
+    type:'line',
+    data:{
+      labels:months.map(monthLabel),
+      datasets:[
+        {label:'Actual spend',data:months.map(m=>txByMonth[m]?.expense||0),borderColor:'#f59e0b',backgroundColor:'#f59e0b22',tension:0.3,pointRadius:4,pointBackgroundColor:'#f59e0b'},
+        {label:'Budget target',data:months.map(()=>burn),borderColor:'#3b82f6',borderDash:[6,4],backgroundColor:'transparent',pointRadius:0},
+      ]
+    },
+    options:{...chartBase,plugins:{...chartBase.plugins,title:{display:true,text:'Actual Spending vs Budget Target',color:'#ccc',font:{size:14,weight:'600',family:"'IBM Plex Sans'"}}}}
+  });
+
+  // Chart 4: Net worth over time
+  const nwData=[...s.netWorthHistory].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  useChart(c4,{
+    type:'line',
+    data:{
+      labels:nwData.map(d=>fmtDate(d.date)),
+      datasets:[{
+        label:'Net Worth',
+        data:nwData.map(d=>d.value),
+        borderColor:'#60a5fa',
+        backgroundColor:'#60a5fa11',
+        tension:0.3,pointRadius:5,pointBackgroundColor:'#60a5fa',fill:true
+      }]
+    },
+    options:{...chartBase,plugins:{...chartBase.plugins,title:{display:true,text:'Net Worth Over Time',color:'#ccc',font:{size:14,weight:'600',family:"'IBM Plex Sans'"}}}}
+  });
+
+  if(!hasData&&nwData.length<=1) return(
+    <div>
+      <div className="info-box">Charts will populate as you log transactions and update balances. Come back once you have a few weeks of data.</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+        {[c1,c2,c3,c4].map((ref,i)=>(
+          <div key={i} className="card" style={{display:'flex',alignItems:'center',justifyContent:'center',height:280,color:'#333',fontSize:13}}>
+            Chart will appear with data
+            <canvas ref={ref} style={{display:'none'}}/>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return(
+    <div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+        <div className="card"><canvas ref={c1}/></div>
+        <div className="card"><canvas ref={c2}/></div>
+        <div className="card"><canvas ref={c3}/></div>
+        <div className="card"><canvas ref={c4}/></div>
+      </div>
+    </div>
+  );
+}
+
+// ─── GOALS TAB ────────────────────────────────────────────────────────────────
+
+function GoalsTab({s,setState,liquid}){
+  const [form,setForm]=useState({name:'',target:'',targetDate:'',note:''});
+  const setF=(k,v)=>setForm(f=>({...f,[k]:v}));
+
+  const addGoal=()=>{
+    const target=parseFloat(form.target);
+    if(!form.name.trim()||!target)return;
+    setState(p=>({...p,goals:[...p.goals,{id:uid(),name:form.name.trim(),target,targetDate:form.targetDate,note:form.note,createdDate:todayStr()}]}));
+    setForm({name:'',target:'',targetDate:'',note:''});
+  };
+  const removeGoal=id=>setState(p=>({...p,goals:p.goals.filter(g=>g.id!==id)}));
+
+  const netWorth=liquid-s.balances.cc+s.balances.investments;
+
+  return(
+    <div>
+      <SL first>Add a Goal</SL>
+      <div className="card">
+        <div style={{display:'grid',gridTemplateColumns:'1fr 130px 150px 1fr auto',gap:10,alignItems:'end'}}>
+          <div><label className="fl">Goal name</label><input type="text" placeholder="Emergency fund, down payment..." value={form.name} onChange={e=>setF('name',e.target.value)}/></div>
+          <div><label className="fl">Target ($)</label><input type="number" placeholder="5000" value={form.target} onChange={e=>setF('target',e.target.value)}/></div>
+          <div><label className="fl">Target date (optional)</label><input type="date" value={form.targetDate} onChange={e=>setF('targetDate',e.target.value)} style={{textAlign:'left'}}/></div>
+          <div><label className="fl">Note</label><input type="text" placeholder="Context or motivation" value={form.note} onChange={e=>setF('note',e.target.value)}/></div>
+          <div><label className="fl">&nbsp;</label><button className="btn bp" onClick={addGoal}>Add</button></div>
+        </div>
+      </div>
+
+      {s.goals.length===0
+        ?<div className="card empty">No goals set yet. Add a savings target above.</div>
+        :s.goals.map(g=>{
+          const pct=Math.min(100,(netWorth/g.target)*100);
+          const remaining=g.target-netWorth;
+          const daysLeft=g.targetDate?Math.max(0,Math.round((new Date(g.targetDate+'T12:00:00')-new Date())/(1000*60*60*24))):null;
+          const color=pct>=100?'#4ade80':pct>=60?'#fbbf24':'#f87171';
+          return(
+            <div key={g.id} className="card">
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14,flexWrap:'wrap',gap:8}}>
+                <div>
+                  <div style={{fontSize:17,fontWeight:600,color:'#f0f0f0',marginBottom:3}}>{g.name}</div>
+                  {g.note&&<div style={{fontSize:13,color:'#555'}}>{g.note}</div>}
+                </div>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  {g.targetDate&&<span style={{fontSize:12,color:'#666'}}>{daysLeft===0?'Due today':`${daysLeft} days left`}</span>}
+                  <button className="btn bg bxs" style={{color:'#444'}} onClick={()=>removeGoal(g.id)}>Remove</button>
+                </div>
+              </div>
+
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:13,color:'#666',marginBottom:8}}>
+                <span>Current net worth: <span className="mono" style={{color:'#e0e0e0'}}>{fmt(netWorth)}</span></span>
+                <span>Target: <span className="mono" style={{color:'#e0e0e0'}}>{fmt(g.target)}</span></span>
+              </div>
+
+              <div className="progress-track" style={{height:8,marginBottom:10}}>
+                <div className="progress-fill" style={{width:`${Math.max(0,pct)}%`,background:color}}/>
+              </div>
+
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:13}}>
+                <span style={{color:color,fontWeight:600}}>{pct.toFixed(1)}% there</span>
+                <span style={{color:'#555'}}>
+                  {remaining>0?<>{fmt(remaining)} to go</>:<span style={{color:'#4ade80'}}>Goal reached</span>}
+                </span>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  );
+}
+
+// ─── SETTINGS TAB ─────────────────────────────────────────────────────────────
+
+function SettingsTab({s,setState,setSyncStatus}){
+  const [bal,setBal]=useState({...s.balances,date:s.balanceDate});
+  const [stipend,setStipend]=useState(s.phdStipend);
+  const [saved,setSaved]=useState(false);
+  const [confirmReset,setConfirmReset]=useState(false);
+
+  const flash=()=>{setSaved(true);setTimeout(()=>setSaved(false),2000);};
+
+  const saveBalances=()=>{
+    const newBal={checking:parseFloat(bal.checking)||0,cc:parseFloat(bal.cc)||0,investments:parseFloat(bal.investments)||0};
+    const nw=newBal.checking-newBal.cc+newBal.investments;
+    setState(p=>({
+      ...p,
+      balances:newBal,
+      balanceDate:bal.date,
+      netWorthHistory:[...p.netWorthHistory,{date:bal.date,value:parseFloat(nw.toFixed(2))}],
+    }));
+    flash();
+  };
+
+  const configured=SUPABASE_URL!=='YOUR_SUPABASE_URL';
+
+  return(
+    <div>
+      {!configured&&(
+        <div className="warn-box" style={{marginBottom:20}}>
+          <strong>Supabase not configured.</strong> Data is saving to localStorage only (this browser, this device).
+          Follow the setup instructions below to enable cross-device sync.
+        </div>
+      )}
+
+      <SL first>Update Balances</SL>
+      <div style={{fontSize:13,color:'#666',marginBottom:12}}>
+        When you come back to this dashboard, open your bank app, update these numbers, and hit Save.
+        Each save also records a net worth snapshot for the chart.
+      </div>
+      <div className="card">
+        <div className="g2" style={{marginBottom:16}}>
+          <div className="fg"><label className="fl">Checking Balance ($)</label><input type="number" value={bal.checking} onChange={e=>setBal(b=>({...b,checking:e.target.value}))}/></div>
+          <div className="fg"><label className="fl">Discover CC Balance ($)</label><input type="number" value={bal.cc} onChange={e=>setBal(b=>({...b,cc:e.target.value}))}/></div>
+          <div className="fg"><label className="fl">Webull / Investments ($)</label><input type="number" value={bal.investments} onChange={e=>setBal(b=>({...b,investments:e.target.value}))}/></div>
+          <div className="fg"><label className="fl">As of date</label><input type="date" value={bal.date} onChange={e=>setBal(b=>({...b,date:e.target.value}))} style={{textAlign:'left'}}/></div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:14}}>
+          <button className="btn bp" onClick={saveBalances}>Save Balances</button>
+          {saved&&<span style={{color:'#4ade80',fontSize:13,fontFamily:'IBM Plex Mono'}}>Saved</span>}
+        </div>
+      </div>
+
+      <SL>PhD Stipend</SL>
+      <div className="card">
+        <div style={{fontSize:13,color:'#666',marginBottom:12}}>
+          Used for the runway buffer calculation. Current assumption: $20k/yr = ~$1,667/mo + full tuition waiver. Update when you have confirmed numbers.
+        </div>
+        <div style={{display:'flex',gap:12,alignItems:'flex-end',maxWidth:300}}>
+          <div style={{flex:1}}><label className="fl">Monthly stipend ($)</label><input type="number" value={stipend} onChange={e=>setStipend(e.target.value)}/></div>
+          <button className="btn bp" onClick={()=>{setState(p=>({...p,phdStipend:parseFloat(stipend)||0}));flash();}}>Save</button>
+        </div>
+      </div>
+
+      <SL>Supabase Setup Instructions</SL>
+      <div className="card">
+        <div style={{fontSize:13,color:'#888',lineHeight:1.9}}>
+          <strong style={{color:'#e0e0e0'}}>Step 1</strong> — Create a free account at <code>supabase.com</code><br/>
+          <strong style={{color:'#e0e0e0'}}>Step 2</strong> — Create a new project. Note your Project URL and anon public key (Settings → API).<br/>
+          <strong style={{color:'#e0e0e0'}}>Step 3</strong> — Open the SQL editor in Supabase and run:
+          <pre>{`create table budget_data (
+  id text primary key,
+  data jsonb,
+  updated_at timestamptz default now()
+);
+
+alter table budget_data enable row level security;
+
+create policy "Allow all" on budget_data
+  for all using (true) with check (true);`}</pre>
+          <strong style={{color:'#e0e0e0'}}>Step 4</strong> — Open this HTML file in a text editor. At the top of the script, replace:<br/>
+          <code>YOUR_SUPABASE_URL</code> → your Project URL<br/>
+          <code>YOUR_SUPABASE_ANON_KEY</code> → your anon public key<br/><br/>
+          <strong style={{color:'#e0e0e0'}}>Step 5</strong> — Host the file on GitHub Pages (free). Create a GitHub account → new repo → upload this file as <code>index.html</code> → Settings → Pages → enable. Done.
+        </div>
+      </div>
+
+      <SL>Data Backup</SL>
+      <div className="card">
+        <div style={{fontSize:13,color:'#666',marginBottom:12}}>Copy and save this JSON as a backup. You can restore it by pasting into a future version if needed.</div>
+        <textarea readOnly value={JSON.stringify(s,null,2)} style={{height:140,resize:'vertical',fontSize:11,fontFamily:'IBM Plex Mono,monospace',color:'#555',marginBottom:16}}/>
+        {!confirmReset
+          ?<button className="btn bd" onClick={()=>setConfirmReset(true)}>Reset All Data to Defaults</button>
+          :<div style={{display:'flex',alignItems:'center',gap:12}}>
+            <span style={{color:'#f87171',fontSize:13}}>Erase all data. Cannot be undone.</span>
+            <button className="btn bd" onClick={()=>{setState(DEFAULT_STATE);setConfirmReset(false);}}>Yes, Reset</button>
+            <button className="btn bg" onClick={()=>setConfirmReset(false)}>Cancel</button>
+          </div>
+        }
+      </div>
+    </div>
+  );
+}
+
+// ─── ROOT APP ─────────────────────────────────────────────────────────────────
+
+function App(){
+  const [state,setState_]=useState(()=>{
+    try{
+      const ls=localStorage.getItem('mxBudV3');
+      if(ls){const p=JSON.parse(ls);return{...DEFAULT_STATE,...p,balances:{...DEFAULT_STATE.balances,...(p.balances||{})},varBudgets:{...DEFAULT_STATE.varBudgets,...(p.varBudgets||{})},subs:p.subs||DEFAULT_STATE.subs,transactions:p.transactions||[],investments:p.investments||[],goals:p.goals||[],netWorthHistory:p.netWorthHistory||DEFAULT_STATE.netWorthHistory};}
+    }catch(e){}
+    return DEFAULT_STATE;
+  });
+
+  const [tab,setTab]=useState('overview');
+  const [syncStatus,setSyncStatus]=useState('idle'); // idle | saving | saved | error
+  const saveTimer=useRef(null);
+
+  const setState=useCallback(updater=>{
+    setState_(prev=>{
+      const next=typeof updater==='function'?updater(prev):updater;
+      // Save to localStorage immediately
+      try{localStorage.setItem('mxBudV3',JSON.stringify(next));}catch(e){}
+      // Debounce Supabase save
+      if(sbClient){
+        if(saveTimer.current)clearTimeout(saveTimer.current);
+        setSyncStatus('saving');
+        saveTimer.current=setTimeout(async()=>{
+          const ok=await saveToDB(next);
+          setSyncStatus(ok?'saved':'error');
+          if(ok)setTimeout(()=>setSyncStatus('idle'),2500);
+        },1200);
+      }
+      return next;
+    });
+  },[]);
+
+  // Load from Supabase on mount
+  useEffect(()=>{
+    if(!sbClient)return;
+    setSyncStatus('saving');
+    loadFromDB().then(remote=>{
+      if(remote){
+        const merged={...DEFAULT_STATE,...remote,balances:{...DEFAULT_STATE.balances,...(remote.balances||{})},varBudgets:{...DEFAULT_STATE.varBudgets,...(remote.varBudgets||{})},subs:remote.subs||DEFAULT_STATE.subs,transactions:remote.transactions||[],investments:remote.investments||[],goals:remote.goals||[],netWorthHistory:remote.netWorthHistory||DEFAULT_STATE.netWorthHistory};
+        setState_(merged);
+        try{localStorage.setItem('mxBudV3',JSON.stringify(merged));}catch(e){}
+      }
+      setSyncStatus('saved');
+      setTimeout(()=>setSyncStatus('idle'),2000);
+    }).catch(()=>setSyncStatus('error'));
+  },[]);
+
+  // Computed
+  const subTotal=state.subs.filter(s=>s.keep).reduce((s,e)=>s+e.amount,0);
+  const varTotal=VAR_DEF.reduce((s,v)=>s+(state.varBudgets[v.id]??v.budget),0);
+  const burn=FIXED_TOTAL+subTotal+varTotal;
+  const txInc=state.transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const txExp=state.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const liquid=state.balances.checking+txInc-txExp;
+
+  const configured=SUPABASE_URL!=='YOUR_SUPABASE_URL';
+  const syncColor=syncStatus==='saved'?'#4ade80':syncStatus==='saving'?'#fbbf24':syncStatus==='error'?'#f87171':'#333';
+  const syncLabel=syncStatus==='saved'?'Synced':syncStatus==='saving'?'Saving...':syncStatus==='error'?'Sync error':'Local only';
+
+  const TABS=[
+    {id:'overview',label:'Overview'},
+    {id:'budget',label:'Budget'},
+    {id:'subscriptions',label:'Subscriptions'},
+    {id:'transactions',label:'Transactions',badge:state.transactions.length},
+    {id:'investments',label:'Investments',badge:state.investments.length||null},
+    {id:'analytics',label:'Analytics'},
+    {id:'goals',label:'Goals',badge:state.goals.length||null},
+    {id:'settings',label:'Settings'},
+  ];
+
+  const shared={s:state,setState};
+
+  return(
+    <div className="wrap">
+      {/* Header */}
+      <div style={{marginBottom:28}}>
+        <div style={{fontSize:11,fontWeight:600,textTransform:'uppercase',letterSpacing:'3px',color:'#333',marginBottom:6}}>Personal Finance</div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',flexWrap:'wrap',gap:8}}>
+          <h1 style={{fontSize:28,fontWeight:600,color:'#f0f0f0',letterSpacing:'-0.5px'}}>Budget Dashboard</h1>
+          <div className="mono" style={{fontSize:12,color:'#444'}}>
+            {fmt(liquid)} liquid &nbsp;·&nbsp; {fmt(burn)}/mo burn &nbsp;·&nbsp; {(liquid/Math.max(1,burn)).toFixed(1)} mo runway
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="tab-bar">
+        {TABS.map(t=>(
+          <div key={t.id} className={`ti ${tab===t.id?'on':''}`} onClick={()=>setTab(t.id)}>
+            {t.label}
+            {t.badge>0&&<span style={{marginLeft:5,fontSize:10,background:tab===t.id?'#1e3a5f':'#1a1a1a',color:tab===t.id?'#60a5fa':'#555',padding:'1px 6px',borderRadius:8}}>{t.badge}</span>}
+          </div>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {tab==='overview'&&<Overview {...shared} burn={burn} liquid={liquid} subTotal={subTotal} varTotal={varTotal}/>}
+      {tab==='budget'&&<BudgetTab {...shared} burn={burn} subTotal={subTotal}/>}
+      {tab==='subscriptions'&&<SubsTab {...shared}/>}
+      {tab==='transactions'&&<TxTab {...shared} liquid={liquid}/>}
+      {tab==='investments'&&<InvestmentsTab {...shared}/>}
+      {tab==='analytics'&&<AnalyticsTab {...shared} burn={burn}/>}
+      {tab==='goals'&&<GoalsTab {...shared} liquid={liquid}/>}
+      {tab==='settings'&&<SettingsTab {...shared} setSyncStatus={setSyncStatus}/>}
+
+      {/* Footer */}
+      <div style={{marginTop:48,paddingTop:16,borderTop:'1px solid #1a1a1a',fontSize:11,color:'#2a2a2a',lineHeight:2}}>
+        Data saves to localStorage on every change. {configured?'Supabase sync enabled — data accessible on all devices.':'Configure Supabase in Settings for cross-device sync.'}
+      </div>
+
+      {/* Sync status badge */}
+      {syncStatus!=='idle'&&(
+        <div className="sync-bar">
+          <div className="dot" style={{background:syncColor}}/>
+          <span style={{color:syncColor}}>{syncLabel}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
